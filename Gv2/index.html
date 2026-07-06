@@ -10,41 +10,78 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   IOL — Telecom · Wireless · Electrical
-   Fixes: Lighter IO letters, Stacked Rounded Rectangles
+   IOL — Automatic Light/Dark Mode & Perfect Widescreen Scaling
    ============================================================ */
 
 :root {
-  /* Scales the entire layout and logo so it never breaks */
-  --u: min(1.1vw, 1.8vh);          
+  /* Safely bounds the logo so it perfectly fits any viewport width/height without overflow */
+  --u: min(0.95vw, 1.8vh, 15px);          
 
-  --ink: #ffffff;
-  --mut: #90A4AE;
-
-  /* Neon Theme Palette */
+  /* Vivid Theme Palette (Stays vibrant on both Dark & Light modes) */
   --sol-a: #FFB74D; --sol-b: #FF9800; --sol-c: #F57C00; --sol-d: #E65100; /* Electrical */
   --rad-a: #4DD0E1; --rad-b: #00BCD4; --rad-c: #0097A7; --rad-d: #006064; /* Wireless */
   --dat-a: #BA68C8; --dat-b: #9C27B0; --dat-c: #7B1FA2; --dat-d: #4A148C; /* Telecom */
 
   --r-tile: 18%;
+
+  /* --- DARK MODE (Default System) --- */
+  --bg-base: #07090c;
+  --scene-in: #11151d;
+  --scene-out: #07090c;
+  
+  --pane-hero: rgba(30, 36, 48, 0.4);
+  --pane-hist: #171c26;
+  --pane-ref: #10141a;
+  --pane-border: rgba(255, 255, 255, 0.05);
+  --pane-shadow: rgba(0, 0, 0, 0.5);
+  
+  --logo-g1: #515764;
+  --logo-g2: #242830;
+  --logo-stroke: rgba(255, 255, 255, 0.06);
+  --logo-drop: rgba(0, 0, 0, 0.6);
+
+  --ink: #ffffff;
+  --mut: #90A4AE;
+
+  --tile-glass: rgba(255, 255, 255, 0.15);
+  --tile-border: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 768px) {
-  :root { --u: 1.25vw; } 
+/* --- LIGHT MODE (Auto-Switches based on Device Settings) --- */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-base: #eef1f6;
+    --scene-in: #ffffff;
+    --scene-out: #eef1f6;
+    
+    --pane-hero: rgba(255, 255, 255, 0.6);
+    --pane-hist: #ffffff;
+    --pane-ref: #f4f6fa;
+    --pane-border: rgba(0, 0, 0, 0.05);
+    --pane-shadow: rgba(0, 0, 0, 0.1);
+    
+    --logo-g1: #f0f3f8;
+    --logo-g2: #c5cbd7;
+    --logo-stroke: rgba(0, 0, 0, 0.04);
+    --logo-drop: rgba(0, 0, 0, 0.15);
+
+    --ink: #11141c;
+    --mut: #546e7a;
+
+    --tile-glass: rgba(255, 255, 255, 0.4);
+    --tile-border: rgba(255, 255, 255, 0.4);
+  }
 }
 
 *{ box-sizing:border-box; margin:0; padding:0 }
-html,body{ height:100%; font-family:'Outfit', system-ui, sans-serif; color:var(--ink); background: #07090c; -webkit-font-smoothing:antialiased; }
+html,body{ height:100%; font-family:'Outfit', system-ui, sans-serif; color:var(--ink); background: var(--bg-base); -webkit-font-smoothing:antialiased; transition: background 0.4s, color 0.4s; }
 ::selection{ background:rgba(0, 188, 212, .28) }
 
 /* ------------------------------------------------------------
    Atmosphere 
    ------------------------------------------------------------ */
-.scene{
-  position:fixed; inset:0; z-index:0; opacity:0; transition:opacity .8s ease;
-  pointer-events:none; overflow:hidden;
-}
-.scene-default{ opacity:1; background: radial-gradient(circle at 50% 50%, #11151d 0%, #07090c 100%); }
+.scene{ position:fixed; inset:0; z-index:0; opacity:0; transition:opacity .8s ease; pointer-events:none; overflow:hidden; }
+.scene-default{ opacity:1; background: radial-gradient(circle at 50% 50%, var(--scene-in) 0%, var(--scene-out) 100%); }
 .blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.4; transition:opacity .8s ease; }
 .b-g{ width:48vmax; height:48vmax; left:-10vmax; top:-14vmax; background:radial-gradient(circle, rgba(255,152,0,.25) 0%, transparent 64%); animation:drift1 26s ease-in-out infinite alternate; }
 .b-y{ width:44vmax; height:44vmax; left:16vmax; bottom:-18vmax; background:radial-gradient(circle, rgba(0,188,212,.25) 0%, transparent 64%); animation:drift2 31s ease-in-out infinite alternate; }
@@ -63,68 +100,61 @@ body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
 .scene-wireless   { background:linear-gradient(168deg, rgba(0,188,212,.12) 0%, transparent 100%) }
 .scene-telecom    { background:linear-gradient(168deg, rgba(156,39,176,.12) 0%, transparent 100%) }
 
-body[data-theme="electrical"] .scene-electrical,
-body[data-theme="wireless"] .scene-wireless,
-body[data-theme="telecom"]  .scene-telecom{ opacity:1 }
+body[data-theme="electrical"] .scene-electrical, body[data-theme="wireless"] .scene-wireless, body[data-theme="telecom"] .scene-telecom{ opacity:1 }
 
 /* ------------------------------------------------------------
-   Scroll Mechanics (Rounded Panes overlapping identically)
+   Scroll Mechanics (Identical Stacking Rectangles)
    ------------------------------------------------------------ */
 .scroll-layers { position: relative; z-index: 10; }
 
 .layer {
   position: sticky; top: 0; min-height: 100vh; width: 100%;
   display: flex; align-items: center; justify-content: center;
-  pointer-events: none; /* Let clicks pass to the layer below */
+  pointer-events: none; /* Let clicks pass to the active layer */
 }
 
-/* Master Pane styling — dictates the exact shape & size of all stacking boxes */
+/* Master Pane styling — All panes will use this exact dimensional structure */
 .pane {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 90%; max-width: 1020px;
-  min-height: calc(var(--u) * 55); /* Forces identical footprint sizes */
-  padding: calc(var(--u) * 5) calc(var(--u) * 7);
+  /* Precisely binds the pane size to the logo footprint so it never cuts off */
+  width: calc(var(--u) * 92.2); 
+  max-width: 95vw;
+  min-height: calc(var(--u) * 48); 
   border-radius: calc(var(--u) * 4);
-  border: 1px solid rgba(255,255,255,.05);
-  pointer-events: auto; /* Re-enable clicks inside panes */
+  border: 1px solid var(--pane-border);
+  pointer-events: auto; /* Re-enable clicks */
+  padding: calc(var(--u) * 5) 20px;
 }
 
-/* Layer 1: Main Logo Hero */
+/* Layer 1: Main Hero */
 .layer-main { z-index: 1; }
 .pane-hero {
-  background: rgba(30, 36, 48, 0.4);
+  background: var(--pane-hero);
   backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  box-shadow: 0 24px 64px var(--pane-shadow);
 }
 
 /* Layer 2: History */
 .layer-history { z-index: 2; }
-.pane-history {
-  background: #1a1e26; /* Solid dark color overrides layer 1 */
-  box-shadow: 0 -30px 60px rgba(0,0,0,0.6); /* Cast shadow UPWARDS */
-}
+.pane-history { background: var(--pane-hist); box-shadow: 0 -30px 60px var(--pane-shadow); }
 
 /* Layer 3: References */
 .layer-references { z-index: 3; }
-.pane-references {
-  background: #13171e;
-  box-shadow: 0 -30px 60px rgba(0,0,0,0.6);
-}
+.pane-references { background: var(--pane-ref); box-shadow: 0 -30px 60px var(--pane-shadow); }
 
 .content-box { max-width: 700px; text-align: center; }
 .content-box h2 {
   font-size: clamp(32px, 4vw, 54px); margin-bottom: 24px; font-weight: 700;
-  background: linear-gradient(90deg, #fff, #90A4AE);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  color: var(--ink); /* Adapts to light/dark automatically */
 }
-.content-box p { font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6; color: #90A4AE; }
+.content-box p { font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6; color: var(--mut); }
 
 /* ------------------------------------------------------------
    IOL Logo Elements
    ------------------------------------------------------------ */
 .logo { display:flex; align-items:center; justify-content:center; }
 
-.lt { display:block; flex:none; filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.6)); }
+.lt { display:block; flex:none; filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*2) var(--logo-drop)); }
 .lt-i { width:calc(var(--u)*9.5);  height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3) }
 .lt-o { width:calc(var(--u)*28.5); height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3.5) }
 
@@ -143,8 +173,8 @@ body[data-theme="telecom"]  .scene-telecom{ opacity:1 }
 }
 .tile::before { 
   content:""; position:absolute; inset:0; border-radius:inherit;
-  background:linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,0) 44%);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); pointer-events:none; z-index: 2;
+  background:linear-gradient(180deg, var(--tile-glass), rgba(255,255,255,0) 44%);
+  box-shadow:inset 0 0 0 1px var(--tile-border); pointer-events:none; z-index: 2;
 }
 
 .t-electrical {
@@ -186,15 +216,15 @@ html.ready .t-wireless:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rg
 html.ready .t-telecom:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(156,39,176,.4); }
 
 html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); transform:scale(.96); }
-.tile:focus-visible{ outline: 3px solid rgba(255,255,255,.8); outline-offset:4px; }
+.tile:focus-visible{ outline: 3px solid var(--mut); outline-offset:4px; }
 
 /* ------------------------------------------------------------
-   Segment panels
+   Segment panels (Inner Popups - explicitly retains white text)
    ------------------------------------------------------------ */
 .panel {
   position:fixed; inset:0; z-index:50; visibility:hidden; pointer-events:none;
   clip-path:circle(0px at 50% 50%); transition:clip-path .8s cubic-bezier(.3,0,.15,1), visibility 0s .8s;
-  color:#fff; overflow:hidden;
+  color:#ffffff; overflow:hidden;
 }
 .panel.open { visibility:visible; pointer-events:auto; transition:clip-path .8s cubic-bezier(.3,0,.15,1); }
 .panel[data-theme="electrical"] { background:linear-gradient(163deg, #FF9800 0%, #E65100 100%) }
@@ -214,22 +244,22 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
 .seg-badge{ width:2.9em; height:2.9em; border-radius:26%; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(8px); }
 .seg-badge svg{ width:1.6em; height:1.6em; color:#fff }
 
-.panel h1{ font-size:clamp(40px,8.2vmin,86px); font-weight:800; line-height:1.02; margin:.35em 0 .3em; text-shadow:0 2px 24px rgba(0,0,0,.18); }
-.lede{ max-width:62ch; font-size:clamp(16px,2.35vmin,20px); line-height:1.6; opacity:.95; }
+.panel h1{ font-size:clamp(40px,8.2vmin,86px); font-weight:800; line-height:1.02; margin:.35em 0 .3em; text-shadow:0 2px 24px rgba(0,0,0,.18); color: #ffffff; }
+.lede{ max-width:62ch; font-size:clamp(16px,2.35vmin,20px); line-height:1.6; opacity:.95; color: #ffffff; }
 .cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(232px,1fr)); gap:clamp(14px,2vw,22px); margin-top:clamp(28px,5vh,46px); }
-.card{ background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.32); backdrop-filter:blur(14px); border-radius:20px; padding:24px 22px; box-shadow:0 16px 36px rgba(0,0,0,.16); }
+.card{ background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.32); backdrop-filter:blur(14px); border-radius:20px; padding:24px 22px; box-shadow:0 16px 36px rgba(0,0,0,.16); color: #ffffff;}
 .card svg{ width:27px; height:27px; color:#fff; opacity:.95 }
 .card h3{ font-size:17px; font-weight:700; margin:.7em 0 .35em }
 .card p{ font-size:14.5px; line-height:1.55; opacity:.92; }
 
-.stats{ display:flex; flex-wrap:wrap; gap:0 clamp(26px,4vw,44px); margin-top:clamp(30px,5.5vh,52px); }
+.stats{ display:flex; flex-wrap:wrap; gap:0 clamp(26px,4vw,44px); margin-top:clamp(30px,5.5vh,52px); color: #ffffff;}
 .stat{ padding:6px clamp(20px,3vw,34px) 6px 0 }
 .stat + .stat{ border-left:1px solid rgba(255,255,255,.28); padding-left:clamp(20px,3vw,34px) }
 .stat b{ display:block; font-size:clamp(26px,4.6vmin,42px); font-weight:800; line-height:1.1; }
 .stat span{ font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; opacity:.82; }
 
 .p-foot{ margin-top:clamp(36px,6vh,58px); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-.cta{ display:inline-block; text-decoration:none; background:#fff; color:var(--ink); padding:.95em 1.7em; border-radius:99px; font-weight:700; font-size:15px; box-shadow:0 12px 28px rgba(0,0,0,.28); transition:transform .25s, box-shadow .25s; }
+.cta{ display:inline-block; text-decoration:none; background:#fff; padding:.95em 1.7em; border-radius:99px; font-weight:700; font-size:15px; box-shadow:0 12px 28px rgba(0,0,0,.28); transition:transform .25s, box-shadow .25s; }
 .cta:hover{ transform:translateY(-3px); box-shadow:0 18px 36px rgba(0,0,0,.32) }
 .panel[data-theme="electrical"] .cta{ color:var(--sol-d) } .panel[data-theme="wireless"] .cta{ color:var(--rad-d) } .panel[data-theme="telecom"] .cta{ color:var(--dat-d) }
 
@@ -242,33 +272,26 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
 </head>
 <body>
 
-<!-- Background Atmospheres -->
 <div class="scene scene-default" aria-hidden="true"><div class="blob b-g"></div><div class="blob b-y"></div><div class="blob b-b"></div></div>
 <div class="scene scene-electrical" aria-hidden="true"></div>
 <div class="scene scene-wireless" aria-hidden="true"></div>
 <div class="scene scene-telecom" aria-hidden="true"></div>
 
-<!-- Scrollable Layers -->
 <div class="scroll-layers">
   
-  <!-- Layer 1: Main Hero -->
   <section class="layer layer-main" id="stage">
     <div class="pane pane-hero">
 
-      <!-- IOL Logo Container -->
       <div class="logo" aria-label="IOL logo">
         
-        <!-- The letter "I" - Lightened for visibility -->
         <svg class="lt lt-i" viewBox="0 0 95 337" aria-hidden="true">
-          <rect x="0" y="0" width="95" height="337" rx="47.5" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+          <rect x="0" y="0" width="95" height="337" rx="47.5" fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="2"/>
         </svg>
 
-        <!-- The letter "O" - Lightened for visibility -->
         <svg class="lt lt-o" viewBox="0 0 285 337" aria-hidden="true">
-          <path fill="url(#glassGrad)" stroke="rgba(255,255,255,0.06)" stroke-width="2" fill-rule="evenodd" d="M78 0 H207 C250 0 285 35 285 78 V259 C285 302 250 337 207 337 H78 C35 337 0 302 0 259 V78 C0 35 35 0 78 0 Z M133 90 H152 C174 90 192 108 192 130 V207 C192 229 174 247 152 247 H133 C111 247 93 229 93 207 V130 C93 108 111 90 133 90 Z"/>
+          <path fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="2" fill-rule="evenodd" d="M78 0 H207 C250 0 285 35 285 78 V259 C285 302 250 337 207 337 H78 C35 337 0 302 0 259 V78 C0 35 35 0 78 0 Z M133 90 H152 C174 90 192 108 192 130 V207 C192 229 174 247 152 247 H133 C111 247 93 229 93 207 V130 C93 108 111 90 133 90 Z"/>
         </svg>
 
-        <!-- The letter "L" made of 3 interactive tiles -->
         <nav class="tiles" aria-label="Business segments">
           <button class="tile t-electrical" data-seg="electrical" aria-label="Electrical & Smart Homes">
             <svg class="t-icon" aria-hidden="true"><use href="#i-bolt"/></svg>
@@ -286,11 +309,10 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
           </button>
         </nav>
       </div>
-      <p style="color: #90A4AE; text-align: center; margin-top: 1rem; font-size: clamp(14px, 1.8vw, 18px);">Tap or hover a segment to explore. Scroll down for more.</p>
+      <p style="color: var(--mut); text-align: center; margin-top: calc(var(--u)*3); font-size: clamp(14px, 1.8vw, 18px); font-weight: 500;">Tap or hover a segment to explore. Scroll down for more.</p>
     </div>
   </section>
 
-  <!-- Layer 2: History (Overlaps perfectly) -->
   <section class="layer layer-history">
     <div class="pane pane-history">
       <div class="content-box">
@@ -300,7 +322,6 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
     </div>
   </section>
 
-  <!-- Layer 3: References (Overlaps perfectly) -->
   <section class="layer layer-references">
     <div class="pane pane-references">
       <div class="content-box">
@@ -312,7 +333,6 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
 
 </div>
 
-<!-- Segment Panel -->
 <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle">
   <div class="p-amb a-electrical" aria-hidden="true"></div>
   <div class="p-amb a-wireless" aria-hidden="true"></div>
@@ -338,13 +358,11 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); t
   </div>
 </div>
 
-<!-- Icons & Gradients -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <!-- Lightened Dark Matte finish for I and O -->
     <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4e5461"/>
-      <stop offset="1" stop-color="#242830"/>
+      <stop offset="0" stop-color="var(--logo-g1)"/>
+      <stop offset="1" stop-color="var(--logo-g2)"/>
     </linearGradient>
   </defs>
 
