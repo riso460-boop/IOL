@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class="intro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IOL — Telecom · Wireless · Electrical</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='26' height='26' rx='7' fill='%23FF9800'/%3E%3Crect x='4' y='34' width='26' height='26' rx='7' fill='%2300BCD4'/%3E%3Crect x='34' y='34' width='26' height='26' rx='7' fill='%239C27B0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   IOL — Telecom · Wireless · Electrical
+   Fixes: Lighter IO letters, Stacked Rounded Rectangles
+   ============================================================ */
+
+:root {
+  /* Scales the entire layout and logo so it never breaks */
+  --u: min(1.1vw, 1.8vh);          
+
+  --ink: #ffffff;
+  --mut: #90A4AE;
+
+  /* Neon Theme Palette */
+  --sol-a: #FFB74D; --sol-b: #FF9800; --sol-c: #F57C00; --sol-d: #E65100; /* Electrical */
+  --rad-a: #4DD0E1; --rad-b: #00BCD4; --rad-c: #0097A7; --rad-d: #006064; /* Wireless */
+  --dat-a: #BA68C8; --dat-b: #9C27B0; --dat-c: #7B1FA2; --dat-d: #4A148C; /* Telecom */
+
+  --r-tile: 18%;
+}
+
+@media (max-width: 768px) {
+  :root { --u: 1.25vw; } 
+}
+
+*{ box-sizing:border-box; margin:0; padding:0 }
+html,body{ height:100%; font-family:'Outfit', system-ui, sans-serif; color:var(--ink); background: #07090c; -webkit-font-smoothing:antialiased; }
+::selection{ background:rgba(0, 188, 212, .28) }
+
+/* ------------------------------------------------------------
+   Atmosphere 
+   ------------------------------------------------------------ */
+.scene{
+  position:fixed; inset:0; z-index:0; opacity:0; transition:opacity .8s ease;
+  pointer-events:none; overflow:hidden;
+}
+.scene-default{ opacity:1; background: radial-gradient(circle at 50% 50%, #11151d 0%, #07090c 100%); }
+.blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.4; transition:opacity .8s ease; }
+.b-g{ width:48vmax; height:48vmax; left:-10vmax; top:-14vmax; background:radial-gradient(circle, rgba(255,152,0,.25) 0%, transparent 64%); animation:drift1 26s ease-in-out infinite alternate; }
+.b-y{ width:44vmax; height:44vmax; left:16vmax; bottom:-18vmax; background:radial-gradient(circle, rgba(0,188,212,.25) 0%, transparent 64%); animation:drift2 31s ease-in-out infinite alternate; }
+.b-b{ width:48vmax; height:48vmax; right:-12vmax; top:2vmax; background:radial-gradient(circle, rgba(156,39,176,.25) 0%, transparent 64%); animation:drift3 29s ease-in-out infinite alternate; }
+
+@keyframes drift1{ to{ transform:translate(4vmax, 3vmax)  scale(1.12) } }
+@keyframes drift2{ to{ transform:translate(-3vmax,-4vmax) scale(1.08) } }
+@keyframes drift3{ to{ transform:translate(-4vmax, 3vmax) scale(1.15) } }
+
+body[data-theme="electrical"] .b-g, body[data-theme="wireless"] .b-y, body[data-theme="telecom"] .b-b{ opacity:.8 }
+body[data-theme="electrical"] .b-y, body[data-theme="electrical"] .b-b,
+body[data-theme="wireless"] .b-g, body[data-theme="wireless"] .b-b,
+body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
+
+.scene-electrical { background:linear-gradient(168deg, rgba(255,152,0,.12) 0%, transparent 100%) }
+.scene-wireless   { background:linear-gradient(168deg, rgba(0,188,212,.12) 0%, transparent 100%) }
+.scene-telecom    { background:linear-gradient(168deg, rgba(156,39,176,.12) 0%, transparent 100%) }
+
+body[data-theme="electrical"] .scene-electrical,
+body[data-theme="wireless"] .scene-wireless,
+body[data-theme="telecom"]  .scene-telecom{ opacity:1 }
+
+/* ------------------------------------------------------------
+   Scroll Mechanics (Rounded Panes overlapping identically)
+   ------------------------------------------------------------ */
+.scroll-layers { position: relative; z-index: 10; }
+
+.layer {
+  position: sticky; top: 0; min-height: 100vh; width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; /* Let clicks pass to the layer below */
+}
+
+/* Master Pane styling — dictates the exact shape & size of all stacking boxes */
+.pane {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 90%; max-width: 1020px;
+  min-height: calc(var(--u) * 55); /* Forces identical footprint sizes */
+  padding: calc(var(--u) * 5) calc(var(--u) * 7);
+  border-radius: calc(var(--u) * 4);
+  border: 1px solid rgba(255,255,255,.05);
+  pointer-events: auto; /* Re-enable clicks inside panes */
+}
+
+/* Layer 1: Main Logo Hero */
+.layer-main { z-index: 1; }
+.pane-hero {
+  background: rgba(30, 36, 48, 0.4);
+  backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+}
+
+/* Layer 2: History */
+.layer-history { z-index: 2; }
+.pane-history {
+  background: #1a1e26; /* Solid dark color overrides layer 1 */
+  box-shadow: 0 -30px 60px rgba(0,0,0,0.6); /* Cast shadow UPWARDS */
+}
+
+/* Layer 3: References */
+.layer-references { z-index: 3; }
+.pane-references {
+  background: #13171e;
+  box-shadow: 0 -30px 60px rgba(0,0,0,0.6);
+}
+
+.content-box { max-width: 700px; text-align: center; }
+.content-box h2 {
+  font-size: clamp(32px, 4vw, 54px); margin-bottom: 24px; font-weight: 700;
+  background: linear-gradient(90deg, #fff, #90A4AE);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.content-box p { font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6; color: #90A4AE; }
+
+/* ------------------------------------------------------------
+   IOL Logo Elements
+   ------------------------------------------------------------ */
+.logo { display:flex; align-items:center; justify-content:center; }
+
+.lt { display:block; flex:none; filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.6)); }
+.lt-i { width:calc(var(--u)*9.5);  height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3) }
+.lt-o { width:calc(var(--u)*28.5); height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3.5) }
+
+.tiles {
+  position:relative; display:grid;
+  grid-template: "g c" "y b" / calc(var(--u)*16) calc(var(--u)*16);
+  gap: calc(var(--u)*1.7);
+}
+
+.tile {
+  position:relative; width:calc(var(--u)*16); height:calc(var(--u)*16);
+  border:0; border-radius:var(--r-tile); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .32s cubic-bezier(.34,1.45,.4,1), box-shadow .32s ease, filter .32s ease;
+  -webkit-tap-highlight-color:transparent; overflow: hidden;
+}
+.tile::before { 
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,0) 44%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); pointer-events:none; z-index: 2;
+}
+
+.t-electrical {
+  grid-area:g; background:linear-gradient(145deg, var(--sol-a) 0%, var(--sol-b) 48%, var(--sol-c) 100%);
+  box-shadow: 0 calc(var(--u)*1.2) calc(var(--u)*2.8) rgba(255, 152, 0, .2);
+}
+.t-wireless {
+  grid-area:y; background:linear-gradient(145deg, var(--rad-a) 0%, var(--rad-b) 48%, var(--rad-c) 100%);
+  box-shadow: 0 calc(var(--u)*1.2) calc(var(--u)*2.8) rgba(0, 188, 212, .2);
+}
+.t-telecom {
+  grid-area:b; background:linear-gradient(145deg, var(--dat-a) 0%, var(--dat-b) 48%, var(--dat-c) 100%);
+  box-shadow: 0 calc(var(--u)*1.2) calc(var(--u)*2.8) rgba(156, 39, 176, .2);
+}
+
+.t-icon {
+  width:calc(var(--u)*6.6); height:calc(var(--u)*6.6);
+  color:#fff; opacity:.92; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));
+  transition: opacity .3s, transform .3s cubic-bezier(.34,1.45,.4,1); pointer-events:none;
+}
+
+/* Embedded Text inside Tiles */
+.t-text {
+  position: absolute; inset: 5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  font-size: calc(var(--u)*2.4); font-weight: 700; line-height: 1.15;
+  color: #fff; opacity: 0; transform: translateY(10px);
+  transition: opacity .3s ease, transform .3s ease; pointer-events: none; z-index: 3;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* Hover Effects */
+html.ready .tile:hover, html.ready .tile:focus-visible{ transform:translateY(calc(var(--u)*-.7)) scale(1.05); }
+html.ready .tile:hover .t-icon { opacity: 0; transform: scale(0.3); }
+html.ready .tile:hover .t-text { opacity: 1; transform: translateY(0); }
+
+html.ready .t-electrical:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(255,152,0,.4); }
+html.ready .t-wireless:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,188,212,.4); }
+html.ready .t-telecom:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(156,39,176,.4); }
+
+html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.7); transform:scale(.96); }
+.tile:focus-visible{ outline: 3px solid rgba(255,255,255,.8); outline-offset:4px; }
+
+/* ------------------------------------------------------------
+   Segment panels
+   ------------------------------------------------------------ */
+.panel {
+  position:fixed; inset:0; z-index:50; visibility:hidden; pointer-events:none;
+  clip-path:circle(0px at 50% 50%); transition:clip-path .8s cubic-bezier(.3,0,.15,1), visibility 0s .8s;
+  color:#fff; overflow:hidden;
+}
+.panel.open { visibility:visible; pointer-events:auto; transition:clip-path .8s cubic-bezier(.3,0,.15,1); }
+.panel[data-theme="electrical"] { background:linear-gradient(163deg, #FF9800 0%, #E65100 100%) }
+.panel[data-theme="wireless"]   { background:linear-gradient(163deg, #00BCD4 0%, #006064 100%) }
+.panel[data-theme="telecom"]    { background:linear-gradient(163deg, #9C27B0 0%, #4A148C 100%) }
+
+.p-amb{ position:absolute; inset:0; opacity:0; transition:opacity .6s; pointer-events:none; overflow:hidden }
+.panel[data-theme="electrical"] .p-amb.a-electrical, .panel[data-theme="wireless"] .p-amb.a-wireless, .panel[data-theme="telecom"] .p-amb.a-telecom{ opacity:1 }
+
+.back{ position:absolute; z-index:5; top:clamp(14px,3vmin,26px); left:clamp(14px,3vmin,26px); display:inline-flex; align-items:center; gap:.5em; padding:.65em 1.15em; border-radius:99px; background:rgba(255,255,255,.16); color:#fff; border:1px solid rgba(255,255,255,.38); backdrop-filter:blur(12px); font:600 14px/1 'Outfit',sans-serif; cursor:pointer; transition:background .25s, transform .25s; }
+.back:hover{ background:rgba(255,255,255,.26); transform:translateX(-2px) }
+.p-scroll{ position:absolute; inset:0; overflow-y:auto; padding:clamp(84px,13vh,130px) clamp(22px,6vw,84px) clamp(44px,8vh,84px); }
+.p-wrap{ max-width:1020px; margin:0 auto; transition:opacity .22s ease }
+.p-wrap.swap{ opacity:0 }
+
+.kick{ display:flex; align-items:center; gap:.9em; font-size:clamp(11px,1.6vmin,13px); font-weight:700; letter-spacing:.22em; text-transform:uppercase; opacity:.9; }
+.seg-badge{ width:2.9em; height:2.9em; border-radius:26%; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(8px); }
+.seg-badge svg{ width:1.6em; height:1.6em; color:#fff }
+
+.panel h1{ font-size:clamp(40px,8.2vmin,86px); font-weight:800; line-height:1.02; margin:.35em 0 .3em; text-shadow:0 2px 24px rgba(0,0,0,.18); }
+.lede{ max-width:62ch; font-size:clamp(16px,2.35vmin,20px); line-height:1.6; opacity:.95; }
+.cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(232px,1fr)); gap:clamp(14px,2vw,22px); margin-top:clamp(28px,5vh,46px); }
+.card{ background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.32); backdrop-filter:blur(14px); border-radius:20px; padding:24px 22px; box-shadow:0 16px 36px rgba(0,0,0,.16); }
+.card svg{ width:27px; height:27px; color:#fff; opacity:.95 }
+.card h3{ font-size:17px; font-weight:700; margin:.7em 0 .35em }
+.card p{ font-size:14.5px; line-height:1.55; opacity:.92; }
+
+.stats{ display:flex; flex-wrap:wrap; gap:0 clamp(26px,4vw,44px); margin-top:clamp(30px,5.5vh,52px); }
+.stat{ padding:6px clamp(20px,3vw,34px) 6px 0 }
+.stat + .stat{ border-left:1px solid rgba(255,255,255,.28); padding-left:clamp(20px,3vw,34px) }
+.stat b{ display:block; font-size:clamp(26px,4.6vmin,42px); font-weight:800; line-height:1.1; }
+.stat span{ font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; opacity:.82; }
+
+.p-foot{ margin-top:clamp(36px,6vh,58px); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.cta{ display:inline-block; text-decoration:none; background:#fff; color:var(--ink); padding:.95em 1.7em; border-radius:99px; font-weight:700; font-size:15px; box-shadow:0 12px 28px rgba(0,0,0,.28); transition:transform .25s, box-shadow .25s; }
+.cta:hover{ transform:translateY(-3px); box-shadow:0 18px 36px rgba(0,0,0,.32) }
+.panel[data-theme="electrical"] .cta{ color:var(--sol-d) } .panel[data-theme="wireless"] .cta{ color:var(--rad-d) } .panel[data-theme="telecom"] .cta{ color:var(--dat-d) }
+
+.nextb{ display:inline-flex; align-items:center; gap:.5em; background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.34); padding:.9em 1.4em; border-radius:99px; font:600 14px/1 'Outfit',sans-serif; cursor:pointer; transition:background .25s, transform .25s; }
+.nextb:hover{ background:rgba(255,255,255,.24); transform:translateX(3px) }
+
+@media (hover:none){ html.ready .tiles:hover .tile:not(:hover){ filter:none; transform:none } }
+@media (prefers-reduced-motion: reduce){ html.intro .pane, .tile { animation:none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Background Atmospheres -->
+<div class="scene scene-default" aria-hidden="true"><div class="blob b-g"></div><div class="blob b-y"></div><div class="blob b-b"></div></div>
+<div class="scene scene-electrical" aria-hidden="true"></div>
+<div class="scene scene-wireless" aria-hidden="true"></div>
+<div class="scene scene-telecom" aria-hidden="true"></div>
+
+<!-- Scrollable Layers -->
+<div class="scroll-layers">
+  
+  <!-- Layer 1: Main Hero -->
+  <section class="layer layer-main" id="stage">
+    <div class="pane pane-hero">
+
+      <!-- IOL Logo Container -->
+      <div class="logo" aria-label="IOL logo">
+        
+        <!-- The letter "I" - Lightened for visibility -->
+        <svg class="lt lt-i" viewBox="0 0 95 337" aria-hidden="true">
+          <rect x="0" y="0" width="95" height="337" rx="47.5" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+        </svg>
+
+        <!-- The letter "O" - Lightened for visibility -->
+        <svg class="lt lt-o" viewBox="0 0 285 337" aria-hidden="true">
+          <path fill="url(#glassGrad)" stroke="rgba(255,255,255,0.06)" stroke-width="2" fill-rule="evenodd" d="M78 0 H207 C250 0 285 35 285 78 V259 C285 302 250 337 207 337 H78 C35 337 0 302 0 259 V78 C0 35 35 0 78 0 Z M133 90 H152 C174 90 192 108 192 130 V207 C192 229 174 247 152 247 H133 C111 247 93 229 93 207 V130 C93 108 111 90 133 90 Z"/>
+        </svg>
+
+        <!-- The letter "L" made of 3 interactive tiles -->
+        <nav class="tiles" aria-label="Business segments">
+          <button class="tile t-electrical" data-seg="electrical" aria-label="Electrical & Smart Homes">
+            <svg class="t-icon" aria-hidden="true"><use href="#i-bolt"/></svg>
+            <div class="t-text">Electrical<br>& Smart<br>Homes</div>
+          </button>
+
+          <button class="tile t-wireless" data-seg="wireless" aria-label="Wireless Telecoms">
+            <svg class="t-icon" aria-hidden="true"><use href="#i-waves"/></svg>
+            <div class="t-text">Wireless<br>Telecom</div>
+          </button>
+
+          <button class="tile t-telecom" data-seg="telecom" aria-label="Telecom Infrastructure">
+            <svg class="t-icon" aria-hidden="true"><use href="#i-fiber"/></svg>
+            <div class="t-text">Telecom<br>Infra</div>
+          </button>
+        </nav>
+      </div>
+      <p style="color: #90A4AE; text-align: center; margin-top: 1rem; font-size: clamp(14px, 1.8vw, 18px);">Tap or hover a segment to explore. Scroll down for more.</p>
+    </div>
+  </section>
+
+  <!-- Layer 2: History (Overlaps perfectly) -->
+  <section class="layer layer-history">
+    <div class="pane pane-history">
+      <div class="content-box">
+        <h2>History & Origins</h2>
+        <p>Decades of pushing boundaries. Our journey started with small steps and expanded into bridging energy gaps, wireless connectivity dead-zones, and engineering data highways.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Layer 3: References (Overlaps perfectly) -->
+  <section class="layer layer-references">
+    <div class="pane pane-references">
+      <div class="content-box">
+        <h2>References & Partners</h2>
+        <p>Trusted globally. We build solutions that last and partner with organizations equally committed to durability and modern architecture.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Segment Panel -->
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="p-amb a-electrical" aria-hidden="true"></div>
+  <div class="p-amb a-wireless" aria-hidden="true"></div>
+  <div class="p-amb a-telecom" aria-hidden="true"></div>
+
+  <button class="back" id="backBtn" type="button">← Back to overview</button>
+
+  <div class="p-scroll">
+    <div class="p-wrap" id="pWrap">
+      <div class="kick">
+        <span class="seg-badge"><svg aria-hidden="true"><use id="badgeUse" href="#i-bolt"/></svg></span>
+        <span id="pKick">Segment 01</span>
+      </div>
+      <h1 id="pTitle">Segment Title</h1>
+      <p class="lede" id="pLede"></p>
+      <div class="cards" id="pCards"></div>
+      <div class="stats" id="pStats"></div>
+      <div class="p-foot">
+        <a class="cta" id="pCta" href="#">Start a project</a>
+        <button class="nextb" id="nextBtn" type="button">Next segment →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Icons & Gradients -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Lightened Dark Matte finish for I and O -->
+    <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4e5461"/>
+      <stop offset="1" stop-color="#242830"/>
+    </linearGradient>
+  </defs>
+
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2 5 13.5h5L8.5 22 19 10.5h-5L13 2Z"/></symbol>
+  <symbol id="i-waves" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.7" fill="currentColor" stroke="none"/><path d="M4.5 12.6a7.4 7.4 0 0 1 6.9 6.9M4.5 7.1a12.9 12.9 0 0 1 12.4 12.4"/></symbol>
+  <symbol id="i-fiber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 12c2.4-5.2 4.9-5.2 7.3 0s4.9 5.2 7.3 0c1.2-2.6 2.4-3.9 4.4-3.3"/><circle cx="21" cy="8.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="3.8" width="16" height="7" rx="1.8"/><rect x="4" y="13.2" width="16" height="7" rx="1.8"/><circle cx="7.6" cy="7.3" r="1" fill="currentColor" stroke="none"/><circle cx="7.6" cy="16.7" r="1" fill="currentColor" stroke="none"/><path d="M11.5 7.3h5M11.5 16.7h5"/></symbol>
+  <symbol id="i-mast" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 22 12 9.5 15.4 22M9.9 17.2h4.2M12 9.5V7.4"/><circle cx="12" cy="5.8" r="1.2" fill="currentColor" stroke="none"/><path d="M8.2 4.4a5.4 5.4 0 0 1 7.6 0M9.9 6.1a3 3 0 0 1 4.2 0" stroke-width="1.6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+</svg>
+
+<script>
+(function(){
+  'use strict';
+
+  var SEGS = {
+    electrical: {
+      name: 'Electrical & Smart Homes', chip: 'Electrical', icon: 'i-bolt', kick: 'Segment 01 · Power',
+      lede: 'We deliver comprehensive electrical power solutions and smart home integrations, building intelligent environments that are energy-efficient and future-ready.',
+      features: [['i-bolt','Power Systems','End-to-end electrical grids, specialized wiring, and robust industrial power deployment.'],['i-home','Smart Automation','Integrating smart hubs, automated lighting, climate control, and security for modern living.'],['i-server','Maintenance','24/7 monitoring, predictive safety checks, and full lifecycle support for electrical systems.']],
+      stats: [['250+','homes automated'],['99.9 %','safety rating'],['24/7','support coverage']],
+      next: 'wireless'
+    },
+    wireless: {
+      name: 'Wireless Telecoms', chip: 'Wireless', icon: 'i-waves', kick: 'Segment 02 · Connectivity',
+      lede: 'Expert construction and maintenance of wireless telecommunications networks, ensuring robust coverage and seamless connectivity across diverse environments and challenging terrains.',
+      features: [['i-mast','Tower Construction','Turn-key build of cell towers, micro-cells, and high-capacity point-to-point microwave relays.'],['i-waves','RF Optimization','Spectrum tuning and signal distribution to ensure maximum coverage with zero dead-zones.'],['i-bolt','Rapid Response','Fast-dispatch maintenance teams keeping carrier networks online through any weather.']],
+      stats: [['500+','towers erected'],['99.99 %','uptime SLA'],['4 hr','incident response']],
+      next: 'telecom'
+    },
+    telecom: {
+      name: 'Telecom Infrastructure', chip: 'Telecom Infra', icon: 'i-fiber', kick: 'Segment 03 · Infrastructure',
+      lede: 'End-to-end building and maintenance of fixed telecommunications infrastructure, specializing in high-capacity optical networks and reliable backbone routing.',
+      features: [['i-fiber','Optical Networks','Laying dark fibre and splicing deep-underground networks for multi-gigabit carrier backbones.'],['i-server','Routing Hardware','Installing and configuring high-end core routing and switching frameworks in major data centers.'],['i-mast','Ongoing Upkeep','Routine line maintenance, damage repair, and infrastructure scaling to meet bandwidth demands.']],
+      stats: [['3,000 km','fibre deployed'],['100G+','node capacity'],['10 yr','durability guarantee']],
+      next: 'electrical'
+    }
+  };
+
+  var root = document.documentElement, body = document.body,
+      panel = document.getElementById('panel'), pWrap = document.getElementById('pWrap'),
+      pKick = document.getElementById('pKick'), pTitle = document.getElementById('pTitle'),
+      pLede = document.getElementById('pLede'), pCards = document.getElementById('pCards'),
+      pStats = document.getElementById('pStats'), badgeUse = document.getElementById('badgeUse'),
+      nextBtn = document.getElementById('nextBtn'), backBtn = document.getElementById('backBtn'),
+      tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function goReady(){ root.classList.remove('intro'); root.classList.add('ready'); }
+  if (reduced) { goReady(); } else { setTimeout(goReady, 500); }
+
+  var leaveTimer = null;
+  function setTheme(key){ clearTimeout(leaveTimer); body.dataset.theme = key; }
+  function clearTheme(){ leaveTimer = setTimeout(function(){ delete body.dataset.theme; }, 140); }
+
+  tiles.forEach(function(btn){
+    var key = btn.dataset.seg;
+    btn.addEventListener('mouseenter', function(){ setTheme(key); });
+    btn.addEventListener('focus',      function(){ setTheme(key); });
+    btn.addEventListener('mouseleave', clearTheme);
+    btn.addEventListener('blur',       clearTheme);
+    btn.addEventListener('click',      function(){ openPanel(key, btn); });
+  });
+
+  var current = null, lastBtn = null, origin = {x:'50%', y:'50%'};
+
+  function fill(key){
+    var s = SEGS[key];
+    pKick.textContent = s.kick; pTitle.textContent = s.name; pLede.textContent = s.lede;
+    badgeUse.setAttribute('href', '#' + s.icon);
+    pCards.innerHTML = s.features.map(function(f){ return '<div class="card"><svg aria-hidden="true"><use href="#' + f[0] + '"/></svg><h3>' + f[1] + '</h3><p>' + f[2] + '</p></div>'; }).join('');
+    pStats.innerHTML = s.stats.map(function(st){ return '<div class="stat"><b>' + st[0] + '</b><span>' + st[1] + '</span></div>'; }).join('');
+    nextBtn.textContent = 'Next: ' + SEGS[s.next].chip + ' →';
+    panel.dataset.theme = key; current = key;
+  }
+
+  function radiusFor(x, y){
+    var w = window.innerWidth, h = window.innerHeight;
+    return Math.hypot(Math.max(x, w - x), Math.max(y, h - y)) + 40;
+  }
+
+  function openPanel(key, btn){
+    lastBtn = btn || null; fill(key); setTheme(key);
+    var cx = btn ? btn.getBoundingClientRect().left + btn.getBoundingClientRect().width / 2 : window.innerWidth / 2;
+    var cy = btn ? btn.getBoundingClientRect().top  + btn.getBoundingClientRect().height / 2 : window.innerHeight / 2;
+    origin = {x: cx, y: cy};
+    panel.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)'; panel.classList.add('open');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ panel.style.clipPath = 'circle(' + radiusFor(cx, cy) + 'px at ' + cx + 'px ' + cy + 'px)'; }); });
+    setTimeout(function(){ backBtn.focus(); }, reduced ? 50 : 450);
+  }
+
+  function closePanel(){
+    if (!panel.classList.contains('open')) return;
+    panel.style.clipPath = 'circle(0px at ' + origin.x + 'px ' + origin.y + 'px)';
+    var done = function(e){
+      if (e && e.propertyName !== 'clip-path') return;
+      panel.classList.remove('open'); panel.removeEventListener('transitionend', done);
+      clearTheme(); if (lastBtn) lastBtn.focus();
+    };
+    if (reduced){ setTimeout(done, 160); } else { panel.addEventListener('transitionend', done); }
+  }
+
+  backBtn.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePanel(); });
+
+  nextBtn.addEventListener('click', function(){
+    var nk = SEGS[current].next; pWrap.classList.add('swap');
+    setTimeout(function(){ fill(nk); setTheme(nk); pWrap.classList.remove('swap'); panel.querySelector('.p-scroll').scrollTop = 0; }, 230);
+  });
+})();
+</script>
+</body>
+</html>
