@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" id="themeMeta" content="#07090c">
 <title>IOL — Telecom · Wireless · Electrical</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='26' height='26' rx='7' fill='%23FF9800'/%3E%3Crect x='4' y='34' width='26' height='26' rx='7' fill='%2300BCD4'/%3E%3Crect x='34' y='34' width='26' height='26' rx='7' fill='%239C27B0'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,14 +11,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   IOL — Fullscreen Panes, Dynamic Mobile, Auto Light/Dark
+   IOL — Shrink-on-Scroll, Unified Mobile Logo, Auto Light/Dark
    ============================================================ */
 
 :root {
-  /* Dynamic scale based on the pane size for desktop */
-  --u: min(1.25vw, 2.2dvh, 22px);          
+  --u: min(1.35vw, 2.4dvh, 26px);          
 
-  /* Vivid Segment Colors (Shared between themes) */
+  /* Vivid Segment Colors */
   --sol-a: #FFB74D; --sol-b: #FF9800; --sol-c: #F57C00; --sol-d: #E65100;
   --rad-a: #4DD0E1; --rad-b: #00BCD4; --rad-c: #0097A7; --rad-d: #006064;
   --dat-a: #BA68C8; --dat-b: #9C27B0; --dat-c: #7B1FA2; --dat-d: #4A148C;
@@ -29,7 +29,7 @@
   --scene-in: #11151d;
   --scene-out: #07090c;
   
-  --pane-hero: rgba(30, 36, 48, 0.4);
+  --pane-hero: rgba(22, 27, 36, 0.4);
   --pane-l2: #161b24;
   --pane-l3: #11151c;
   --pane-l4: #0c0f14;
@@ -38,8 +38,8 @@
   --pane-shadow: rgba(0, 0, 0, 0.5);
   
   --logo-g1: #4e5461;
-  --logo-g2: #242830;
-  --logo-stroke: rgba(255, 255, 255, 0.06);
+  --logo-g2: #22262d;
+  --logo-stroke: rgba(255, 255, 255, 0.05);
   --logo-drop: rgba(0, 0, 0, 0.6);
 
   --ink: #ffffff;
@@ -52,23 +52,22 @@
 /* --- LIGHT MODE (Auto-Switches based on OS Settings) --- */
 @media (prefers-color-scheme: light) {
   :root {
-    --bg-base: #e9ecef;
+    --bg-base: #e4e7ec;
     --scene-in: #ffffff;
-    --scene-out: #e9ecef;
+    --scene-out: #e4e7ec;
     
-    --pane-hero: rgba(255, 255, 255, 0.7);
+    --pane-hero: rgba(255, 255, 255, 0.6);
     --pane-l2: #f8f9fa;
     --pane-l3: #f1f3f5;
     --pane-l4: #e9ecef;
-    --pane-l5: #e2e5e9;
-    --pane-border: rgba(0, 0, 0, 0.05);
-    --pane-shadow: rgba(0, 0, 0, 0.08);
+    --pane-l5: #e4e7ec;
+    --pane-border: rgba(0, 0, 0, 0.08);
+    --pane-shadow: rgba(0, 0, 0, 0.12);
     
-    /* Beautiful embossed pillowy look for IO */
     --logo-g1: #ffffff;
-    --logo-g2: #d8dde6;
-    --logo-stroke: rgba(255, 255, 255, 1);
-    --logo-drop: rgba(0, 0, 0, 0.15);
+    --logo-g2: #c4c9d4;
+    --logo-stroke: rgba(0, 0, 0, 0.08);
+    --logo-drop: rgba(0, 0, 0, 0.12);
 
     --ink: #11141c;
     --mut: #546e7a;
@@ -102,7 +101,7 @@ body[data-theme="wireless"] .b-g, body[data-theme="wireless"] .b-b,
 body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
 
 /* ------------------------------------------------------------
-   Scroll Mechanics (Fullscreen Stacking Rectangles)
+   Scroll Mechanics (Shrinking, 5% Smaller Panes)
    ------------------------------------------------------------ */
 .scroll-layers { position: relative; z-index: 10; }
 
@@ -112,14 +111,15 @@ body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
   pointer-events: none;
 }
 
-/* Base Master Pane - Near Full Screen */
+/* Master Pane - 93vw (5% smaller for a floating card look) */
 .pane {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 96vw; max-width: 1800px;
-  height: 94dvh; max-height: 1200px;
+  width: 93vw;
+  height: 92dvh;
   border-radius: 40px; border: 1px solid var(--pane-border);
   pointer-events: auto; position: relative;
   overflow: hidden;
+  will-change: transform, opacity; /* Optimizes the scroll-shrink effect */
 }
 
 .layer-1 { z-index: 1; }
@@ -143,24 +143,31 @@ body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
 /* ------------------------------------------------------------
    IOL Logo & Tiles (Desktop Layout)
    ------------------------------------------------------------ */
-.logo { display:flex; align-items:center; justify-content:center; }
+.logo-container { display:flex; align-items:center; justify-content:center; }
 .io-letters { display: flex; align-items: center; }
 
-.lt { display:block; flex:none; filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*2) var(--logo-drop)); }
+.lt { display:block; flex:none; filter:drop-shadow(0 calc(var(--u)*0.8) calc(var(--u)*1.5) var(--logo-drop)); }
 .lt-i { width:calc(var(--u)*9.5);  height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3) }
 .lt-o { width:calc(var(--u)*28.5); height:calc(var(--u)*33.7); margin-right:calc(var(--u)*3.5) }
 
-.tiles {
+/* Mobile ONLY mini-L (Hidden on Desktop) */
+.m-mini-l { display: none; }
+
+/* Desktop Interactive Tiles */
+.d-tiles {
   position:relative; display:grid;
   grid-template: "g c" "y b" / calc(var(--u)*16) calc(var(--u)*16);
   gap: calc(var(--u)*1.7);
 }
 
+/* Mobile Interactive Tiles (Hidden on Desktop) */
+.m-tiles { display: none; }
+
 .tile {
   position:relative; width:calc(var(--u)*16); height:calc(var(--u)*16);
   border:0; border-radius:var(--r-tile); cursor:pointer;
   display:flex; flex-direction: column; align-items:center; justify-content:center;
-  transition:transform .32s cubic-bezier(.34,1.45,.4,1), box-shadow .32s ease, filter .32s ease;
+  transition:transform .32s cubic-bezier(.34,1.45,.4,1), box-shadow .32s ease;
   overflow: hidden;
 }
 .tile::before { 
@@ -182,57 +189,77 @@ body[data-theme="telecom"]  .b-g, body[data-theme="telecom"]  .b-y{ opacity:.1 }
   box-shadow: 0 calc(var(--u)*1.2) calc(var(--u)*2.8) rgba(156, 39, 176, .2);
 }
 
-.t-icon {
+.d-tiles .t-icon {
   width: 35%; height: 35%; color:#fff; opacity:.95; 
   filter:drop-shadow(0 4px 6px rgba(0,0,0,.2));
-  transform: translateY(-15%); /* Shift up slightly to make room for text */
+  transform: translateY(-15%);
   transition: transform .3s cubic-bezier(.34,1.45,.4,1); pointer-events:none; z-index: 3;
 }
 
-/* Permanent Small Text Label at the bottom of tiles */
+/* Clean Hover Effects (Washed out bug fixed) */
+html.ready .d-tiles .tile:hover, html.ready .d-tiles .tile:focus-visible{ transform:translateY(calc(var(--u)*-.7)) scale(1.05); z-index: 10; }
+html.ready .d-tiles .tile:hover .t-icon { transform: translateY(-25%) scale(1.1); }
+html.ready .d-tiles .t-electrical:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(255,152,0,.4); }
+html.ready .d-tiles .t-wireless:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,188,212,.4); }
+html.ready .d-tiles .t-telecom:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(156,39,176,.4); }
+
+/* Permanent Labels */
 .t-label {
   position: absolute; bottom: 12%; width: 100%;
   text-align: center; font-size: calc(var(--u)*1.7); font-weight: 600;
   color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,.3);
   pointer-events: none; z-index: 3;
 }
-
-/* Hover Effects */
-html.ready .tile:hover, html.ready .tile:focus-visible{ transform:translateY(calc(var(--u)*-.7)) scale(1.05); }
-html.ready .tile:hover .t-icon { transform: translateY(-25%) scale(1.1); }
-
-html.ready .t-electrical:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(255,152,0,.4); }
-html.ready .t-wireless:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,188,212,.4); }
-html.ready .t-telecom:hover{ box-shadow: 0 calc(var(--u)*2) calc(var(--u)*4) rgba(156,39,176,.4); }
-
-html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); transform:scale(.96); }
 .tile:focus-visible{ outline: 3px solid var(--mut); outline-offset:4px; }
 
 /* ------------------------------------------------------------
-   Mobile Layout Override
+   Mobile Layout Overrides
    ------------------------------------------------------------ */
 @media (max-width: 800px) {
-  .logo { flex-direction: column; width: 100%; }
+  .pane { width: 93vw; border-radius: 32px; padding: 2rem 1.5rem; justify-content: flex-start; padding-top: 5vh; }
   
-  /* IO Letters scale down and center */
-  .io-letters { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
-  .lt-i { width: 50px; height: 170px; margin-right: 15px; }
-  .lt-o { width: 145px; height: 170px; margin-right: 0; }
+  .logo-container { flex-direction: column; width: 100%; align-items: center; }
+  
+  /* IO Letters completely scaled to match the square L grid exactly */
+  .io-letters { display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; }
+  .lt-i { width: 32px; height: 110px; margin-right: 12px; }
+  .lt-o { width: 100px; height: 110px; margin-right: 12px; }
 
-  /* Grid breaks out of L-shape into functional app-like grid */
-  .tiles {
+  /* Hide Desktop Interactive L, Show Mobile Unified Logo L */
+  .d-tiles { display: none; }
+  
+  .m-mini-l {
+    display: grid;
+    grid-template: "g c" "y b" / 1fr 1fr;
+    gap: 8px; width: 110px; height: 110px;
+  }
+  .m-mini-l .m-sq { 
+    border-radius: 14px; 
+    /* Matte texture seamlessly matching I and O */
+    background: linear-gradient(180deg, var(--logo-g1), var(--logo-g2));
+    box-shadow: inset 0 0 0 2px var(--logo-stroke);
+    filter: drop-shadow(0 4px 6px var(--logo-drop));
+  }
+  .m-sq.m-1 { grid-area: g; }
+  .m-sq.m-2 { grid-area: y; }
+  .m-sq.m-3 { grid-area: b; }
+
+  /* Show Mobile Interactive Action Grid Below */
+  .m-tiles {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "g y" "b b";
     gap: 15px; width: 100%; max-width: 450px;
+    margin-top: 2vh;
   }
-  .tile { width: 100%; height: auto; aspect-ratio: 1; border-radius: 20px; }
-  .t-telecom { aspect-ratio: 2.1; } /* Spans two columns, slightly wider */
   
-  .t-icon { width: 40%; height: 40%; }
-  .t-label { font-size: 15px; bottom: 10%; }
-
-  .pane { border-radius: 24px; padding: 2rem 1.5rem; }
+  .m-tiles .tile { width: 100%; height: auto; aspect-ratio: 1; border-radius: 20px; }
+  .m-tiles .t-telecom { aspect-ratio: 2.1; } /* Spans two columns */
+  
+  .m-tiles .t-icon { width: 35%; height: 35%; transform: translateY(-15%); opacity: 1; z-index: 3; position: relative; pointer-events:none; filter:drop-shadow(0 4px 6px rgba(0,0,0,.2)); color: #fff;}
+  .m-tiles .t-label { font-size: 16px; bottom: 12%; opacity: 1; }
+  
+  .scroll-down-text { position: relative !important; margin-top: 4vh; }
 }
 
 /* ------------------------------------------------------------
@@ -281,7 +308,6 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
 .nextb{ display:inline-flex; align-items:center; gap:.5em; background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.35); padding:.9em 1.4em; border-radius:99px; font:600 14px/1 'Outfit',sans-serif; cursor:pointer; transition:background .25s, transform .25s; }
 .nextb:hover{ background:rgba(255,255,255,.25); transform:translateX(3px) }
 
-@media (hover:none){ html.ready .tiles:hover .tile:not(:hover){ filter:none; transform:none } }
 @media (prefers-reduced-motion: reduce){ html.intro .pane, .tile { animation:none !important; } }
 </style>
 </head>
@@ -297,22 +323,29 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
   <section class="layer layer-1" id="stage">
     <div class="pane pane-hero">
 
-      <div class="logo" aria-label="IOL logo">
+      <div class="logo-container" aria-label="IOL logo">
         
-        <!-- Extracted IO Letters (Responsive) -->
+        <!-- I, O, and unified mobile L -->
         <div class="io-letters">
           <!-- The letter "I" -->
           <svg class="lt lt-i" viewBox="0 0 95 337" aria-hidden="true">
-            <rect x="0" y="0" width="95" height="337" rx="47.5" fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="2"/>
+            <rect x="0" y="0" width="95" height="337" rx="47.5" fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="3"/>
           </svg>
           <!-- The letter "O" -->
           <svg class="lt lt-o" viewBox="0 0 285 337" aria-hidden="true">
-            <path fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="2" fill-rule="evenodd" d="M78 0 H207 C250 0 285 35 285 78 V259 C285 302 250 337 207 337 H78 C35 337 0 302 0 259 V78 C0 35 35 0 78 0 Z M133 90 H152 C174 90 192 108 192 130 V207 C192 229 174 247 152 247 H133 C111 247 93 229 93 207 V130 C93 108 111 90 133 90 Z"/>
+            <path fill="url(#glassGrad)" stroke="var(--logo-stroke)" stroke-width="3" fill-rule="evenodd" d="M78 0 H207 C250 0 285 35 285 78 V259 C285 302 250 337 207 337 H78 C35 337 0 302 0 259 V78 C0 35 35 0 78 0 Z M133 90 H152 C174 90 192 108 192 130 V207 C192 229 174 247 152 247 H133 C111 247 93 229 93 207 V130 C93 108 111 90 133 90 Z"/>
           </svg>
+
+          <!-- MOBILE ONLY: Non-interactive Matte Mini L Logo -->
+          <div class="m-mini-l" aria-hidden="true">
+            <div class="m-sq m-1"></div>
+            <div class="m-sq m-2"></div>
+            <div class="m-sq m-3"></div>
+          </div>
         </div>
 
-        <!-- Segment Tiles -->
-        <nav class="tiles" aria-label="Business segments">
+        <!-- DESKTOP ONLY: Interactive Tiles forming the L -->
+        <nav class="tiles d-tiles" aria-label="Business segments">
           <button class="tile t-electrical" data-seg="electrical">
             <svg class="t-icon" aria-hidden="true"><use href="#i-bolt"/></svg>
             <div class="t-label">Electrical</div>
@@ -326,9 +359,26 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
             <div class="t-label">Telecom</div>
           </button>
         </nav>
+
       </div>
 
-      <p style="position:absolute; bottom: 5%; color: var(--mut); font-size: clamp(14px, 1.2vw, 16px); font-weight: 500;">Tap a segment to explore. Scroll down for more.</p>
+      <!-- MOBILE ONLY: Interactive Tiles forming the Grid -->
+      <nav class="tiles m-tiles" aria-label="Mobile Business segments">
+        <button class="tile t-electrical" data-seg="electrical">
+          <svg class="t-icon" aria-hidden="true"><use href="#i-bolt"/></svg>
+          <div class="t-label">Electrical</div>
+        </button>
+        <button class="tile t-wireless" data-seg="wireless">
+          <svg class="t-icon" aria-hidden="true"><use href="#i-waves"/></svg>
+          <div class="t-label">Wireless</div>
+        </button>
+        <button class="tile t-telecom" data-seg="telecom">
+          <svg class="t-icon" aria-hidden="true"><use href="#i-fiber"/></svg>
+          <div class="t-label">Telecom</div>
+        </button>
+      </nav>
+
+      <p class="scroll-down-text" style="position:absolute; bottom: 4%; color: var(--mut); font-size: clamp(14px, 1.2vw, 16px); font-weight: 500;">Tap a segment to explore. Scroll down for more.</p>
     </div>
   </section>
 
@@ -354,7 +404,7 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
     </div>
   </section>
 
-  <!-- Layer 4: Global Infrastructure (New) -->
+  <!-- Layer 4: Global Infrastructure -->
   <section class="layer layer-4">
     <div class="pane pane-4">
       <div class="content-box">
@@ -365,7 +415,7 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
     </div>
   </section>
 
-  <!-- Layer 5: Support & Maintenance (New) -->
+  <!-- Layer 5: Support & Maintenance -->
   <section class="layer layer-5">
     <div class="pane pane-5">
       <div class="content-box">
@@ -431,21 +481,21 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
 
   var SEGS = {
     electrical: {
-      name: 'Electrical & Smart Homes', icon: 'i-bolt', kick: 'Segment 01 · Power',
+      name: 'Electrical & Smart Homes', icon: 'i-bolt', kick: 'Segment 01 · Power', themeColor: '#FF9800',
       lede: 'We deliver comprehensive electrical power solutions and smart home integrations, building intelligent environments that are energy-efficient and future-ready.',
       features: [['i-bolt','Power Systems','End-to-end electrical grids, specialized wiring, and robust industrial power deployment.'],['i-home','Smart Automation','Integrating smart hubs, automated lighting, climate control, and security for modern living.'],['i-server','Maintenance','24/7 monitoring, predictive safety checks, and full lifecycle support for electrical systems.']],
       stats: [['250+','homes automated'],['99.9 %','safety rating'],['24/7','support coverage']],
       next: 'wireless'
     },
     wireless: {
-      name: 'Wireless Telecoms', icon: 'i-waves', kick: 'Segment 02 · Connectivity',
+      name: 'Wireless Telecoms', icon: 'i-waves', kick: 'Segment 02 · Connectivity', themeColor: '#00BCD4',
       lede: 'Expert construction and maintenance of wireless telecommunications networks, ensuring robust coverage and seamless connectivity across diverse environments and challenging terrains.',
       features: [['i-mast','Tower Construction','Turn-key build of cell towers, micro-cells, and high-capacity point-to-point microwave relays.'],['i-waves','RF Optimization','Spectrum tuning and signal distribution to ensure maximum coverage with zero dead-zones.'],['i-bolt','Rapid Response','Fast-dispatch maintenance teams keeping carrier networks online through any weather.']],
       stats: [['500+','towers erected'],['99.99 %','uptime SLA'],['4 hr','incident response']],
       next: 'telecom'
     },
     telecom: {
-      name: 'Telecom Infrastructure', icon: 'i-fiber', kick: 'Segment 03 · Infrastructure',
+      name: 'Telecom Infrastructure', icon: 'i-fiber', kick: 'Segment 03 · Infrastructure', themeColor: '#9C27B0',
       lede: 'End-to-end building and maintenance of fixed telecommunications infrastructure, specializing in high-capacity optical networks and reliable backbone routing.',
       features: [['i-fiber','Optical Networks','Laying dark fibre and splicing deep-underground networks for multi-gigabit carrier backbones.'],['i-server','Routing Hardware','Installing and configuring high-end core routing and switching frameworks in major data centers.'],['i-mast','Ongoing Upkeep','Routine line maintenance, damage repair, and infrastructure scaling to meet bandwidth demands.']],
       stats: [['3,000 km','fibre deployed'],['100G+','node capacity'],['10 yr','durability guarantee']],
@@ -459,9 +509,39 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
       pLede = document.getElementById('pLede'), pCards = document.getElementById('pCards'),
       pStats = document.getElementById('pStats'), badgeUse = document.getElementById('badgeUse'),
       nextBtn = document.getElementById('nextBtn'), backBtn = document.getElementById('backBtn'),
-      tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+      tiles = Array.prototype.slice.call(document.querySelectorAll('.tile')),
+      themeMeta = document.getElementById('themeMeta'),
+      layers = document.querySelectorAll('.layer');
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  /* Sets initial Safari bar color based on OS Light/Dark mode */
+  function resetThemeMeta() { themeMeta.content = isLight ? "#e4e7ec" : "#07090c"; }
+  resetThemeMeta();
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+    isLight = e.matches; if(!panel.classList.contains('open')) resetThemeMeta();
+  });
+
+  /* Shrink-On-Scroll Logic */
+  window.addEventListener('scroll', function() {
+    var st = window.scrollY;
+    layers.forEach(function(layer) {
+      var pane = layer.querySelector('.pane');
+      var layerTop = layer.offsetTop;
+      if (st > layerTop) {
+        var diff = st - layerTop;
+        var progress = Math.min(1, diff / window.innerHeight);
+        var scale = 1 - (progress * 0.06); /* Shrinks up to 6% */
+        var opacity = 1 - (progress * 0.5); /* Fades halfway out */
+        pane.style.transform = 'scale(' + scale + ')';
+        pane.style.opacity = opacity;
+      } else {
+        pane.style.transform = 'scale(1)';
+        pane.style.opacity = 1;
+      }
+    });
+  });
 
   function goReady(){ root.classList.remove('intro'); root.classList.add('ready'); }
   if (reduced) { goReady(); } else { setTimeout(goReady, 500); }
@@ -481,6 +561,7 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
     pStats.innerHTML = s.stats.map(function(st){ return '<div class="stat"><b>' + st[0] + '</b><span>' + st[1] + '</span></div>'; }).join('');
     nextBtn.textContent = 'Next Segment →';
     panel.dataset.theme = key; current = key;
+    themeMeta.content = s.themeColor; /* Fixes iOS Safari Black Bars */
   }
 
   function radiusFor(x, y){
@@ -493,12 +574,21 @@ html.ready .tiles:hover .tile:not(:hover){ filter:saturate(.5) brightness(.8); t
     var cx = btn ? btn.getBoundingClientRect().left + btn.getBoundingClientRect().width / 2 : window.innerWidth / 2;
     var cy = btn ? btn.getBoundingClientRect().top  + btn.getBoundingClientRect().height / 2 : window.innerHeight / 2;
     origin = {x: cx, y: cy};
+    
+    document.body.style.overflow = 'hidden'; /* Prevents background scrolling bug */
+    
     panel.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)'; panel.classList.add('open');
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ panel.style.clipPath = 'circle(' + radiusFor(cx, cy) + 'px at ' + cx + 'px ' + cy + 'px)'; }); });
   }
 
   function closePanel(){
     if (!panel.classList.contains('open')) return;
+    
+    /* Return user to the absolute top of page instantly underneath the hiding circle */
+    window.scrollTo(0, 0); 
+    document.body.style.overflow = '';
+    resetThemeMeta(); 
+    
     panel.style.clipPath = 'circle(0px at ' + origin.x + 'px ' + origin.y + 'px)';
     var done = function(e){
       if (e && e.propertyName !== 'clip-path') return;
